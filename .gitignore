@@ -1,0 +1,15 @@
+# Secret environment variables (Passwords/API Keys)
+.env
+
+# Dependency folders (Heavy files)
+node_modules/
+dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Operating system files
+.DS_Store
+Thumbs.db
