@@ -33,23 +33,23 @@ exports.getProductById = (req, res) => {
     });
 };
 exports.createProduct = (req, res) => {
-  const data = req.body;
+  const { title, price, category, description, image } = req.body;
 
-  if (Array.isArray(data)) {
-    Product.insertMany(data)
-      .then((products) => {
-        res.status(201).json(products);
-      })
-      .catch((error) => {
-        res.status(400).json({ message: error.message });
-      });
-  } else {
-    Product.create(data)
-      .then((product) => {
-        res.status(201).json(product);
-      })
-      .catch((error) => {
-        res.status(400).json({ message: error.message });
-      });
+  if (!title || !price || !category) {
+    return res.status(400).json({ message: "Required fields missing" });
   }
+
+  Product.create({
+    title,
+    price,
+    category,
+    description,
+    image,
+  })
+    .then((product) => {
+      res.status(201).json(product);
+    })
+    .catch((error) => {
+      res.status(500).json({ message: error.message });
+    });
 };

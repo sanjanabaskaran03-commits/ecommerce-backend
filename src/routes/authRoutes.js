@@ -14,7 +14,12 @@ router.post("/login", login);
 router.post("/logout", logout);
 
 router.get("/me", protect, (req, res) => {
-  res.json({ user: req.user });
+  res.json({
+    user: {
+      name: req.user.name,   // ✅ ADD THIS
+      email: req.user.email,
+      role: req.user.role
+    }
+  });
 });
-
 module.exports = router;

@@ -7,8 +7,12 @@ const {
   createProduct
 } = require('../controllers/productController');
 
+const { protect, isAdmin } = require('../middleware/authMiddleware');
+
 router.get('/', getProducts);
 router.get('/:id', getProductById);
-router.post('/',createProduct)
+
+// 🔥 Protect this route
+router.post('/', protect, isAdmin, createProduct);
 
 module.exports = router;

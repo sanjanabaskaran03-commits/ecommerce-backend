@@ -3,7 +3,8 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 exports.signup = (req, res) => {
-  const { email, password } = req.body;
+ const { name, email, password } = req.body;
+  console.log("Signup data:", email, password);
 
   User.findOne({ email })
     .then(user => {
@@ -14,6 +15,7 @@ exports.signup = (req, res) => {
       return bcrypt.hash(password, 10)
         .then(hash => {
           return User.create({
+            name,
             email,
             password: hash,
             role: "user"
@@ -32,27 +34,36 @@ exports.signup = (req, res) => {
 exports.login = (req, res) => {
   const { email, password } = req.body;
 
+  console.log("Login attempt:", email, password); 
+
   User.findOne({ email })
     .then(user => {
+      console.log("User from DB:", user); 
+
       if (!user) {
-        return res.status(400).json({ message: "Invalid credentials" });
+        return res.status(400).json({ message: "User not found" });
       }
 
       return bcrypt.compare(password, user.password)
         .then(isMatch => {
+          console.log("Password match:", isMatch); // 🔥
+
           if (!isMatch) {
             return res.status(400).json({ message: "Invalid credentials" });
           }
-
-          const token = jwt.sign(
-            { id: user._id, role: user.role },
-            process.env.JWT_SECRET,
-            { expiresIn: "1d" }
-          );
-
+const token = jwt.sign(
+  { 
+    id: user._id,
+    name: user.name,   // ✅ ADD THIS
+    role: user.role,
+    email: user.email
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: "1d" }
+);
           res.cookie("token", token, {
             httpOnly: true,
-            secure: false, 
+            secure: false,
             maxAge: 24 * 60 * 60 * 1000,
           });
 
@@ -63,6 +74,7 @@ exports.login = (req, res) => {
         });
     })
     .catch(err => {
+      console.error("Login error:", err);
       res.status(500).json({ message: err.message });
     });
 };
