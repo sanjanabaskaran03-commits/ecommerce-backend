@@ -1,5 +1,6 @@
 const Product = require('../models/product');
 
+// GET ALL PRODUCTS
 exports.getProducts = (req, res) => {
   const { category } = req.query;
   let filter = {};
@@ -13,12 +14,15 @@ exports.getProducts = (req, res) => {
       res.json(products);
     })
     .catch((error) => {
-      res.status(500).json({ 
-        message: "Error fetching products", 
-        error: error.message 
+      res.status(500).json({
+        message: "Error fetching products",
+        error: error.message
       });
     });
 };
+
+
+// GET PRODUCT BY ID
 exports.getProductById = (req, res) => {
   Product.findById(req.params.id)
     .then((product) => {
@@ -32,8 +36,20 @@ exports.getProductById = (req, res) => {
       res.status(500).json({ message: error.message });
     });
 };
+
+
+// 🔥 CREATE PRODUCT (UPDATED FOR IMAGE UPLOAD)
 exports.createProduct = (req, res) => {
-  const { title, price, category, description, image } = req.body;
+  const {
+    title,
+    price,
+    category,
+    description,
+    isRecommended,
+    discountPercent,
+    rating,
+    sectionTags
+  } = req.body;
 
   if (!title || !price || !category) {
     return res.status(400).json({ message: "Required fields missing" });
@@ -44,7 +60,15 @@ exports.createProduct = (req, res) => {
     price,
     category,
     description,
-    image,
+    isRecommended,
+    discountPercent,
+
+    // convert JSON strings (from FormData)
+    rating: rating ? JSON.parse(rating) : undefined,
+    sectionTags: sectionTags ? JSON.parse(sectionTags) : [],
+
+    // 🔥 image from multer upload
+    image: req.file ? `/uploads/${req.file.filename}` : "",
   })
     .then((product) => {
       res.status(201).json(product);
