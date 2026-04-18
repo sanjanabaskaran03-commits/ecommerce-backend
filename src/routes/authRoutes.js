@@ -16,7 +16,7 @@ router.post("/logout", logout);
 router.get("/me", protect, (req, res) => {
   res.json({
     user: {
-      name: req.user.name,   // ✅ ADD THIS
+      name: req.user.name,    
       email: req.user.email,
       role: req.user.role
     }

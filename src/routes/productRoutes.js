@@ -1,28 +1,15 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-const {
-  getProducts,
-  getProductById,
-  createProduct
-} = require('../controllers/productController');
+const controller = require("../controllers/productController");
 
-const { protect, isAdmin } = require('../middleware/authMiddleware');
+// GET
+router.get("/", controller.getProducts);
+router.get("/:id", controller.getProductById);
 
-// NEW: upload middleware
-const upload = require('../middleware/upload');
-
-router.get('/', getProducts);
-router.get('/:id', getProductById);
-
-// 🔥 UPDATED ROUTE (NOW WITH IMAGE UPLOAD)
-// router.post(
-//   '/',
-//   protect,
-//   isAdmin,
-//   upload.single("image"),
-//   createProduct
-// );
-router.post('/', upload.single("image"), createProduct);
+// POST
+router.post("/", controller.createProduct);
+router.put("/:id", controller.updateProduct);
+router.delete("/:id", controller.deleteProduct);
 
 module.exports = router;

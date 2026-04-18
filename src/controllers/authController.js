@@ -54,7 +54,7 @@ exports.login = (req, res) => {
 const token = jwt.sign(
   { 
     id: user._id,
-    name: user.name,   // ✅ ADD THIS
+    name: user.name, 
     role: user.role,
     email: user.email
   },
@@ -64,6 +64,8 @@ const token = jwt.sign(
           res.cookie("token", token, {
             httpOnly: true,
             secure: false,
+             sameSite: "lax",
+             path: "/",  
             maxAge: 24 * 60 * 60 * 1000,
           });
 
@@ -80,8 +82,9 @@ const token = jwt.sign(
 };
 
 
-// 🔹 LOGOUT
 exports.logout = (req, res) => {
-  res.clearCookie("token");
+  res.clearCookie("token", {
+  path: "/", 
+});
   res.json({ message: "Logged out" });
 };
