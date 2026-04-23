@@ -7,7 +7,17 @@ exports.getProducts = async (req, res) => {
   let filter = {};
 
   if (category) filter.category = category;
-  if (section) filter.sectionTags = section;
+ if (section === "deals") {
+    const now = new Date();
+
+    filter = {
+      sectionTags: "deals",
+      dealStart: { $lte: now },
+      dealEnd: { $gte: now },
+    };
+  } else if (section) {
+    filter.sectionTags = section;
+  }
 
   try {
     let query = Product.find(filter);
@@ -52,11 +62,14 @@ exports.createProduct = (req, res) => {
     stock
   } = req.body;
 
+  console.log("👉 Incoming stock (CREATE):", stock);
+
   if (image && image.length > 5 * 1024 * 1024) {
     return res.status(400).json({
       message: "Image too large (max 5MB recommended)"
     });
   }
+
   Product.create({
     title,
     price,
@@ -64,11 +77,14 @@ exports.createProduct = (req, res) => {
     description,
     discountPercent,
     sectionTags: sectionTags || [],
-specifications: specifications || {},
+    specifications: specifications || {},
     image,
-    stock: stock ?? 0 
+    stock: stock ?? 0
   })
-    .then((data) => res.status(201).json(data))
+    .then((data) => {
+      console.log("👉 Saved stock (CREATE):", data.stock);
+      res.status(201).json(data);
+    })
     .catch((err) => res.status(500).json({ message: err.message }));
 };
 
@@ -85,11 +101,14 @@ exports.updateProduct = (req, res) => {
     stock
   } = req.body;
 
+  console.log("👉 Incoming stock (UPDATE):", stock);
+
   if (image && image.length > 5 * 1024 * 1024) {
     return res.status(400).json({
       message: "Image too large (max 5MB recommended)"
     });
   }
+
   Product.findByIdAndUpdate(
     req.params.id,
     {
@@ -99,13 +118,16 @@ exports.updateProduct = (req, res) => {
       description,
       discountPercent,
       sectionTags: sectionTags || [],
-specifications: specifications || {},
-stock: stock ?? 0,
-      ...(image && { image }) // ✅ base64 update
+      specifications: specifications || {},
+      stock: stock ?? 0,
+      ...(image && { image })
     },
     { new: true }
   )
-    .then((data) => res.json(data))
+    .then((data) => {
+      console.log("👉 Saved stock (UPDATE):", data.stock);
+      res.json(data);
+    })
     .catch((err) => res.status(500).json({ message: err.message }));
 };
 
