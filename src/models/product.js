@@ -12,17 +12,41 @@ const productSchema = new mongoose.Schema(
     sectionTags: [String],
     discountPercent: Number,
 
-    // ✅ Specifications (for 2nd image UI)
     specifications: {
       type: Map,
       of: String,
     },
+
     stock: {
-  type: Number,
-  default: 0,
-},
-dealStart: Date,
+      type: Number,
+      default: 0,
+    },
+
+    dealStart: Date,
     dealEnd: Date,
+
+    // ⭐ NEW: REVIEWS SYSTEM
+    reviews: [
+      {
+        user: String,
+        rating: Number,
+        comment: String,
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+
+    rating: {
+      type: Number,
+      default: 0,
+    },
+
+    numReviews: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

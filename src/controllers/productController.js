@@ -2,34 +2,51 @@ const Product = require("../models/Product");
 
 // GET PRODUCTS (category / section / limit)
 exports.getProducts = async (req, res) => {
-  const { category, section, limit } = req.query;
-
-  let filter = {};
-
-  if (category) filter.category = category;
- if (section === "deals") {
-    const now = new Date();
-
-    filter = {
-      sectionTags: "deals",
-      dealStart: { $lte: now },
-      dealEnd: { $gte: now },
-    };
-  } else if (section) {
-    filter.sectionTags = section;
-  }
-
   try {
-    let query = Product.find(filter);
+    const { category, page, limit } = req.query;
 
-    if (limit) {
-      query = query.limit(Number(limit));
+    let filter = {};
+
+    if (category) {
+      filter.category = {
+        $regex: new RegExp(category.trim(), "i"),
+      };
     }
 
-    const products = await query;
-    res.json(products);
+    // ✅ If NO pagination → return ALL (homepage)
+    if (!page && !limit) {
+      const products = await Product.find(filter);
+
+      return res.json({
+        success: true,
+        data: products,
+      });
+    }
+
+    // ✅ Pagination only for shop page
+    const currentPage = Number(page) || 1;
+    const perPage = Number(limit) || 5;
+
+    const skip = (currentPage - 1) * perPage;
+
+    const total = await Product.countDocuments(filter);
+
+    const products = await Product.find(filter)
+      .skip(skip)
+      .limit(perPage);
+
+    res.json({
+      success: true,
+      data: products,
+      totalPages: Math.ceil(total / perPage),
+      currentPage,
+    });
+
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({
+      success: false,
+      message: err.message,
+    });
   }
 };
 
