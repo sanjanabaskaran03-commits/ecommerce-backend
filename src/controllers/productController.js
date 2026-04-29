@@ -139,7 +139,7 @@ exports.updateProduct = (req, res) => {
       stock: stock ?? 0,
       ...(image && { image })
     },
-    { new: true }
+   { returnDocument: "after" }
   )
     .then((data) => {
       console.log("👉 Saved stock (UPDATE):", data.stock);
