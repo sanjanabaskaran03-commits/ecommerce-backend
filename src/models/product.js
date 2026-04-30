@@ -8,7 +8,7 @@ const productSchema = new mongoose.Schema(
     category: String,
 
     image: String,
-
+    img: String,
     sectionTags: [String],
     discountPercent: Number,
 
